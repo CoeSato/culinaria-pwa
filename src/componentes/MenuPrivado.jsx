@@ -23,7 +23,9 @@ function MenuPrivado() {
                             {usuario &&
                                 <NavDropdown title="Manutenções" id="basic-nav-dropdown">
                                     <NavLink className="dropdown-item" exact="true"
-                                        to="filmes">Cozinheiros</NavLink>
+                                        to="cozinheiros">Cozinheiros</NavLink>
+                                    <NavLink className="dropdown-item" exact="true"
+                                        to="ingredientes">Ingredientes</NavLink>
                                 </NavDropdown>
                             }
                             <NavLink className="nav-link active" exact="true"

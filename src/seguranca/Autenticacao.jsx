@@ -41,7 +41,7 @@ export const getUsuario = () => {
         if (decoded.exp <= Math.floor(new Date() / 1000)) {
             console.log('Token expirado');
             logout();
-            throw "Token expirado";
+            throw new Error("Token expirado");
         } else {
             return decoded.usuario;
         }
