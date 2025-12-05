@@ -11,7 +11,8 @@ function Formulario() {
     const { objeto, handleChange, acaoCadastrar, alerta, exibirForm, setExibirForm } = useContext(CozinheiroContext);
 
     return (
-        <Dialogo id="modalEdicao" titulo="Categoria"
+        // ✅ CORRIGIDO: Título do Diálogo
+        <Dialogo id="modalEdicao" titulo="Cozinheiro" 
             idform="formulario" acaoCadastrar={acaoCadastrar}
             exibirForm={exibirForm} setExibirForm={setExibirForm}>
             <Alerta alerta={alerta} />
@@ -29,6 +30,16 @@ function Formulario() {
                     msgvalido="OK certo" msginvalido="Informe o nome"
                     requerido={true} readonly={false}
                     maxCaracteres={40} />
+            </Col>
+            {/* 🛑 CORRIGIDO: Adicionando o campo 'descricao' que estava faltando */}
+            <Col xs={12} md={12}>
+                <CampoEntrada value={objeto ? objeto.descricao : ''}
+                    id="txtDescricao" name="descricao" label="Descrição"
+                    // Usando 'text'. Se houver um 'textarea' ou 'CampoTextArea', seria melhor.
+                    tipo="text" onchange={handleChange} 
+                    msgvalido="Descrição OK" msginvalido="Informe a descrição"
+                    requerido={true} readonly={false}
+                    maxCaracteres={255} /> {/* Ajuste maxCaracteres conforme o backend */}
             </Col>
         </Dialogo>
     )

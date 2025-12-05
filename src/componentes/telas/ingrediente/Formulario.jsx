@@ -11,7 +11,8 @@ function Formulario() {
     const { objeto, handleChange, acaoCadastrar, alerta, exibirForm, setExibirForm } = useContext(IngredienteContext);
 
     return (
-        <Dialogo id="modalEdicao" titulo="Categoria"
+        // ✅ CORRIGIDO: Título do Diálogo
+        <Dialogo id="modalEdicao" titulo="Ingrediente" 
             idform="formulario" acaoCadastrar={acaoCadastrar}
             exibirForm={exibirForm} setExibirForm={setExibirForm}>
             <Alerta alerta={alerta} />
@@ -29,6 +30,15 @@ function Formulario() {
                     msgvalido="OK certo" msginvalido="Informe o nome"
                     requerido={true} readonly={false}
                     maxCaracteres={40} />
+            </Col>
+            {/* 🛑 CORRIGIDO: Adicionando o campo 'unidade_medida' que estava faltando */}
+            <Col xs={12} md={12}>
+                <CampoEntrada value={objeto ? objeto.unidade_medida : ''}
+                    id="txtUnidadeMedida" name="unidade_medida" label="Unidade de Medida"
+                    tipo="text" onchange={handleChange}
+                    msgvalido="OK certo" msginvalido="Informe a unidade de medida (ex: kg, g, ml, unid)"
+                    requerido={true} readonly={false}
+                    maxCaracteres={10} /> 
             </Col>
         </Dialogo>
     )

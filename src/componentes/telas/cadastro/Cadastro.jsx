@@ -9,7 +9,7 @@ function Cadastro() {
 
     const [email, setEmail] = useState("");
     const [senha, setSenha] = useState("");
-    const [tipo, setTipo] = useState(""); // A = Administrador, U = Usuário comum
+    const [tipo, setTipo] = useState("");
     const [telefone, setTelefone] = useState("");
     const [nome, setNome] = useState("");
 
@@ -20,19 +20,14 @@ function Cadastro() {
     const acaoCadastro = async e => {
         e.preventDefault();
 
-        // Validação de campos
-        if (!email || !senha || !tipo || !telefone || !nome) {
+        // Desestruturando os estados para criar o corpo
+        const body = { email, senha, tipo, telefone, nome };
+
+        // Validação de campos (mantida, mas mais sucinta)
+        if (Object.values(body).some(value => !value)) {
             setAlerta({ status: "error", message: "Por favor, preencha todos os campos." });
             return;
         }
-
-        const body = {
-            email: email,
-            senha: senha,
-            tipo: tipo,
-            telefone: telefone,
-            nome: nome
-        };
 
         console.log("Dados do cadastro:", body);
         setCarregando(true);
@@ -43,23 +38,42 @@ function Cadastro() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(body),
             });
+            
+            // 🛑 CORREÇÃO LÓGICA: Verifica se a resposta HTTP foi OK (2xx)
+            if (!response.ok) {
+                // Se a API retornar um erro HTTP (400, 500, etc.), o JSON contém a mensagem de erro
+                const errorJson = await response.json();
+                setAlerta({ status: 'error', message: errorJson.message || 'Erro ao comunicar com a API.' });
+                return;
+            }
+
             const json = await response.json();
             console.log("Resposta do servidor:", json);
 
+            // Se a API retornar sucesso no HTTP, mas talvez falhe na lógica (status: 'error' no body)
             if (json.status === 'error') {
-                setAlerta({  status: 'error', message: 'Erro ao cadastrar usuário!' });
-            }
-            if (json.status === 'success') {
-                setAlerta({  status: 'success', message: 'Cadastro realizado com sucesso!'});
+                setAlerta({ 
+                    status: 'error', 
+                    message: json.message || 'Erro ao cadastrar usuário! Tente novamente.' 
+                });
+            } else if (json.status === 'success') {
+                setAlerta({ status: 'success', message: 'Cadastro realizado com sucesso! Redirecionando para o login...' });
+                
+                // Limpa os campos após o sucesso
                 setEmail("");
                 setSenha("");
                 setTipo("");
                 setTelefone("");
                 setNome("");
+                
+                // ✅ MELHORIA: Redireciona para o login após 2 segundos
+                setTimeout(() => {
+                    navigate('/login'); 
+                }, 2000);
             }
         } catch (err) {
-            console.error(err.message);
-            setAlerta({ status: "error", message: err.message });
+            console.error("Erro na requisição:", err.message);
+            setAlerta({ status: "error", message: `Erro de conexão: ${err.message}` });
         } finally {
             setCarregando(false);
         }
@@ -106,7 +120,7 @@ function Cadastro() {
                                 label="Tipo de usuário"
                                 onchange={e => setTipo(e.target.value)}
                                 msgvalido="Tipo OK"
-                                msginvalido=""
+                                msginvalido="Selecione o tipo do usuário" // ⬅️ Melhoria: Mensagem mais clara
                                 requerido={true}
                                 readonly={false}
                             >

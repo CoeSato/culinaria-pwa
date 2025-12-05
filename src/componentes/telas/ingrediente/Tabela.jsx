@@ -15,7 +15,9 @@ function Tabela() {
             <Button variant="primary" onClick={() => novoObjeto()}>
                 Novo <i className="bi bi-file-earmark-plus"></i>
             </Button>
-            {listaObjetos.length === 0 && <h1>Nenhum ingrediente encontrada</h1>}
+            {/* ✅ CORRIGIDO: Concordância de gênero */}
+            {listaObjetos.length === 0 && <h1>Nenhum ingrediente encontrado</h1>} 
+            
             {listaObjetos.length > 0 && (
 
                 <Table striped bordered hover responsive>
@@ -26,13 +28,16 @@ function Tabela() {
                             }}>Ações</th>
                             <th>Código</th>
                             <th>Nome</th>
+                            <th>Unidade de Medida</th> {/* 🛑 CORRIGIDO: Nova Coluna */}
                         </tr>
                     </thead>
                     <tbody>
                         {listaObjetos.map((objeto) => (
                             <tr key={objeto.codigo}>
                                 <td align="center">
-                                    <Button variant="danger" onClick={() => { remover(objeto.codigo); }}>
+                                    <Button variant="danger" 
+                                        onClick={() => { remover(objeto.codigo); }}
+                                        style={{marginRight: '5px'}}>
                                         Deletar <i className="bi bi-trash"></i>
                                     </Button>
                                     
@@ -42,6 +47,7 @@ function Tabela() {
                                 </td>
                                 <td>{objeto.codigo}</td>
                                 <td>{objeto.nome}</td>
+                                <td>{objeto.unidade_medida}</td> {/* 🛑 CORRIGIDO: Exibindo a unidade de medida */}
                             </tr>
                         ))}
                     </tbody>

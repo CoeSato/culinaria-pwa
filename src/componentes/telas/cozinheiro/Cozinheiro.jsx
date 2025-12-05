@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import CozinheiroContext from './CozinheiroContext';
 import {
-    getCozinheiroAPI, 
+    getCozinheiroAPI,
     getCozinehiroPorCodigoAPI,
     deleteCozinheiroPorCodigoAPI,
-    cadastraCozinheiroAPI, 
+    cadastraCozinheiroAPI,
 } from '../../../servicos/CozinheiroServico';
 import Tabela from './Tabela';
 import Formulario from './Formulario'
@@ -16,18 +16,31 @@ function Cozinheiro() {
     const [listaObjetos, setListaObjetos] = useState([]);
     const [editar, setEditar] = useState(false);
     const [exibirForm, setExibirForm] = useState(false);
+    
+    // 🛑 CORRIGIDO: Estado inicial completo da entidade Cozinheiro
     const [objeto, setObjeto] = useState({
-        codigo: "", nome: "", descricao: "", sigla: ""
+        codigo: 0, 
+        nome: "", 
+        descricao: ""
     })
 
     const recuperaCozinheiros = async () => {
-        setListaObjetos(await getCozinheiroAPI());
+        try {
+            setListaObjetos(await getCozinheiroAPI());
+        } catch (err) {
+             setAlerta({ status: 'error', message: err.message });
+        }
     }
 
     const remover = async codigo => {
         if (window.confirm('Deseja remover este objeto?')) {
-            let retornoAPI = await deleteCozinheiroPorCodigoAPI(codigo);
-            setAlerta({ status: retornoAPI.status, message: retornoAPI.message })
+            try {
+                let retornoAPI = await deleteCozinheiroPorCodigoAPI(codigo);
+                setAlerta({ status: retornoAPI.status, message: retornoAPI.message });
+            } catch (err) {
+                 // 🛑 Tratamento de erro do throw da API
+                 setAlerta({ status: 'error', message: err.message });
+            }
             recuperaCozinheiros();
         }
     }
@@ -43,7 +56,8 @@ function Cozinheiro() {
                 setEditar(true);
             }
         } catch (err) {
-            console.error(err.message);
+            // 🛑 Tratamento de erro do throw da API
+            setAlerta({ status: 'error', message: err.message });
         }
         recuperaCozinheiros();
     }
@@ -51,18 +65,25 @@ function Cozinheiro() {
     const novoObjeto = () => {
         setEditar(false);
         setAlerta({ status: "", message: "" });
+        // 🛑 CORRIGIDO: Resetando o objeto para a forma correta
         setObjeto({
             codigo: 0,
-            nome: ""
+            nome: "",
+            descricao: ""
         });
-		setExibirForm(true);
+        setExibirForm(true);
     }
 
     const editarObjeto = async codigo => {
-        setObjeto(await getCozinehiroPorCodigoAPI(codigo))
-        setEditar(true);
-        setAlerta({ status: "", message: "" });
-		setExibirForm(true);
+        try {
+            // ✅ Melhoria: Lida com erro se o código não for encontrado (404)
+            setObjeto(await getCozinehiroPorCodigoAPI(codigo));
+            setEditar(true);
+            setAlerta({ status: "", message: "" });
+            setExibirForm(true);
+        } catch (err) {
+            setAlerta({ status: 'error', message: err.message });
+        }
     }
 
     const handleChange = (e) => {

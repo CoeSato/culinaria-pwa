@@ -1,3 +1,17 @@
+// ReceitaServiceAPI.js
+
+// Função auxiliar para tratamento de erro (garante que a exceção seja lançada em status 4xx/5xx)
+const handleResponse = async (response) => {
+    if (!response.ok) {
+        // Se o status for 4xx ou 5xx, tenta extrair a mensagem de erro do corpo JSON
+        const errorData = await response.json();
+        // Lança um erro que será capturado pelo bloco 'catch' no Context
+        throw new Error(errorData.message || 'Erro desconhecido ao comunicar com a API');
+    }
+    // Se a resposta for OK (2xx), retorna o corpo JSON
+    return response.json();
+}
+
 export const getReceitaAPI = async () => {
     const response = await fetch(`${process.env.REACT_APP_ENDERECO_API}/receitas`,
         {
@@ -6,13 +20,8 @@ export const getReceitaAPI = async () => {
                 "Content-Type": "application/json"
             }
         });
-    if (!response.ok) {
-        // Se o status for 4xx ou 5xx, lança um erro com a mensagem da API
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Erro ao comunicar com a API');
-    }
-    const data = await response.json()
-    return data;
+    // O seu código original já estava correto aqui, usando a função unifica o tratamento.
+    return handleResponse(response);
 }
 
 export const getReceitaPorCodigoAPI = async codigo => {
@@ -23,8 +32,8 @@ export const getReceitaPorCodigoAPI = async codigo => {
                 "Content-Type": "application/json"
             }
         });
-    const data = await response.json();
-    return data;
+    // 🛑 CORRIGIDO: Adicionando tratamento de erro HTTP
+    return handleResponse(response);
 }
 
 export const deleteReceitaPorCodigoAPI = async codigo => {
@@ -35,8 +44,8 @@ export const deleteReceitaPorCodigoAPI = async codigo => {
                 "Content-Type": "application/json"
             }
         });
-    const data = await response.json();
-    return data;
+    // 🛑 CORRIGIDO: Adicionando tratamento de erro HTTP
+    return handleResponse(response);
 }
 
 export const cadastraReceitaAPI = async (objeto, metodo) => {
@@ -45,6 +54,6 @@ export const cadastraReceitaAPI = async (objeto, metodo) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(objeto),
     })
-    const data = await response.json();
-    return data;
+    // 🛑 CORRIGIDO: Adicionando tratamento de erro HTTP
+    return handleResponse(response);
 }

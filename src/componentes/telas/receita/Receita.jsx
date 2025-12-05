@@ -16,18 +16,36 @@ function Receita() {
     const [listaObjetos, setListaObjetos] = useState([]);
     const [editar, setEditar] = useState(false);
     const [exibirForm, setExibirForm] = useState(false);
+    
+    // 🛑 CORRIGIDO: Estado inicial completo e correto para a entidade Receita
     const [objeto, setObjeto] = useState({
-        codigo: "", nome: "", descricao: "", sigla: ""
+        codigo: 0, 
+        nome: "", 
+        modo: "",
+        tempo: 0,
+        nota: 0,
+        data: "",
+        ingredientes: [], 
+        chefe: 0, 
     })
 
     const recuperaReceitas = async () => {
-        setListaObjetos(await getReceitaAPI());
+        try { // ⬅️ Adicionando try/catch para a função de listagem
+            setListaObjetos(await getReceitaAPI());
+        } catch (err) {
+            setAlerta({ status: 'error', message: err.message });
+        }
     }
 
     const remover = async codigo => {
         if (window.confirm('Deseja remover este objeto?')) {
-            let retornoAPI = await deleteReceitaPorCodigoAPI(codigo);
-            setAlerta({ status: retornoAPI.status, message: retornoAPI.message })
+            try { // ⬅️ Adicionando try/catch
+                let retornoAPI = await deleteReceitaPorCodigoAPI(codigo);
+                setAlerta({ status: retornoAPI.status, message: retornoAPI.message })
+            } catch (err) {
+                 // 🛑 Captura o erro lançado pelo serviço de API
+                 setAlerta({ status: 'error', message: err.message });
+            }
             recuperaReceitas();
         }
     }
@@ -35,7 +53,7 @@ function Receita() {
     const acaoCadastrar = async e => {
         e.preventDefault();
         const metodo = editar ? "PUT" : "POST";
-        try {
+        try { // O try já existia, mas o catch precisa atualizar o alerta
             let retornoAPI = await cadastraReceitaAPI(objeto, metodo);
             setAlerta({ status: retornoAPI.status, message: retornoAPI.message });
             setObjeto(retornoAPI.objeto);
@@ -43,7 +61,8 @@ function Receita() {
                 setEditar(true);
             }
         } catch (err) {
-            console.error(err.message);
+            // 🛑 Captura o erro lançado pelo serviço de API
+            setAlerta({ status: 'error', message: err.message });
         }
         recuperaReceitas();
     }
@@ -51,6 +70,7 @@ function Receita() {
     const novoObjeto = () => {
         setEditar(false);
         setAlerta({ status: "", message: "" });
+        // 🛑 CORRIGIDO: Resetando o objeto para a forma correta
         setObjeto({
             codigo: 0,
             nome: "",
@@ -58,17 +78,22 @@ function Receita() {
             tempo: 0,
             nota: 0,
             data: "",
-            ingredientes: [], // Inicialize como um array vazio
-            chefe: 0, // Apenas um valor
+            ingredientes: [], 
+            chefe: 0, 
         });
-		setExibirForm(true);
+        setExibirForm(true);
     }
 
     const editarObjeto = async codigo => {
-        setObjeto(await getReceitaPorCodigoAPI(codigo))
-        setEditar(true);
-        setAlerta({ status: "", message: "" });
-		setExibirForm(true);
+        try { // ⬅️ Adicionando try/catch
+            setObjeto(await getReceitaPorCodigoAPI(codigo))
+            setEditar(true);
+            setAlerta({ status: "", message: "" });
+            setExibirForm(true);
+        } catch (err) {
+             // 🛑 Captura o erro lançado pelo serviço de API
+             setAlerta({ status: 'error', message: err.message });
+        }
     }
 
     const handleChange = (e) => {
@@ -81,6 +106,11 @@ function Receita() {
         } else {
             // Para todos os outros campos (text, number, date, select simples):
             value = e.target.value;
+        }
+        
+        // Se o campo for 'chefe' (select) ou 'codigo'/'tempo'/'nota' (number), converte para número
+        if (name === 'chefe' || name === 'codigo' || name === 'tempo' || name === 'nota') {
+             value = parseInt(value) || 0; // Tenta converter para inteiro, senão 0
         }
 
         setObjeto({ ...objeto, [name]: value });
